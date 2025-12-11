@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支援前線 - 競速對戰系統</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>🏆 支援前線 - 競速對戰系統</h2>
+
+        <div class="mission-panel">
+            <h3>🎯 當前指定物品：<span id="currentMissionDisplay" style="color: #e53e3e; font-weight: bold; font-size: 1.2em;">讀取中...</span></h3>
+            
+            <div class="mission-controls">
+                <select id="missionSelect">
+                    <option value="Any">✨ 自由模式 (什麼都加分)</option>
+                    
+                    <optgroup label="🍽️ 餐具容器">
+                        <option value="bottle">🍾 瓶子 (bottle)</option>
+                        <option value="cup">🥤 杯子 (cup)</option>
+                        <option value="mug">🍺 馬克杯 (mug)</option>
+                        <option value="bowl">🥣 碗 (bowl)</option>
+                        <option value="plate">🍽️ 盤子 (plate)</option>
+                        <option value="lunchbox">🍱 便當盒 (lunchbox)</option>
+                        <option value="chopsticks">🥢 筷子 (chopsticks)</option>
+                        <option value="spoon">🥄 湯匙 (spoon)</option>
+                        <option value="fork">🍴 叉子 (fork)</option>
+                    </optgroup>
+
+                    <optgroup label="🥪 食物零食">
+                        <option value="snack">🍟 零食 (snack)</option>
+                        <option value="candy">🍬 糖果 (candy)</option>
+                        <option value="bread">🍞 麵包 (bread)</option>
+                        <option value="fruit">🍎 水果 (fruit)</option>
+                        <option value="instant_noodles">🍜 泡麵 (instant_noodles)</option>
+                    </optgroup>
+
+                    <optgroup label="✏️ 文具用品">
+                        <option value="tissue">🧻 衛生紙 (tissue)</option>
+                        <option value="paper">📄 紙張 (paper)</option>
+                        <option value="notebook">📓 筆記本 (notebook)</option>
+                        <option value="book">📖 書籍 (book)</option>
+                        <option value="pen">🖊️ 原子筆 (pen)</option>
+                        <option value="pencil">✏️ 鉛筆 (pencil)</option>
+                        <option value="marker">🖍️ 麥克筆 (marker)</option>
+                        <option value="eraser">🧼 橡皮擦 (eraser)</option>
+                        <option value="ruler">📏 尺 (ruler)</option>
+                        <option value="pencil_case">👝 鉛筆盒 (pencil_case)</option>
+                        <option value="stapler">📎 釘書機 (stapler)</option>
+                        <option value="tape">🎞️ 膠帶 (tape)</option>
+                    </optgroup>
+
+                    <optgroup label="💻 電子產品">
+                        <option value="cellphone">📱 手機 (cellphone)</option>
+                        <option value="laptop">💻 筆電 (laptop)</option>
+                        <option value="mouse">🖱️ 滑鼠 (mouse)</option>
+                        <option value="keyboard">⌨️ 鍵盤 (keyboard)</option>
+                        <option value="charger">🔌 充電器 (charger)</option>
+                        <option value="earphone">🎧 耳機 (earphone)</option>
+                        <option value="power_bank">🔋 行動電源 (power_bank)</option>
+                        <option value="microphone">🎤 麥克風 (microphone)</option>
+                    </optgroup>
+
+                    <optgroup label="🎒 個人物品 & 配件">
+                        <option value="backpack">🎒 背包 (backpack)</option>
+                        <option value="wallet">👛 錢包 (wallet)</option>
+                        <option value="key">🔑 鑰匙 (key)</option>
+                        <option value="id_card">🪪 識別證 (id_card)</option>
+                        <option value="watch">⌚ 手錶 (watch)</option>
+                        <option value="glasses">👓 眼鏡 (glasses)</option>
+                        <option value="mask">😷 口罩 (mask)</option>
+                        <option value="umbrella">☂️ 雨傘 (umbrella)</option>
+                        <option value="coat">🧥 外套 (coat)</option>
+                        <option value="hat">🧢 帽子 (hat)</option>
+                        <option value="towel">🧣 毛巾 (towel)</option>
+                        <option value="lipstick">💄 口紅 (lipstick)</option>
+                        <option value="accessory">💍 飾品 (accessory)</option>
+                    </optgroup>
+
+                    <optgroup label="💰 金錢">
+                        <option value="coin">🪙 硬幣 (coin)</option>
+                        <option value="banknote">💵 紙鈔 (banknote)</option>
+                    </optgroup>
+
+                    <optgroup label="📂 大範圍類別">
+                        <option value="stationery">★ 所有文具</option>
+                        <option value="tableware">★ 所有餐具</option>
+                        <option value="electronic">★ 所有電子產品</option>
+                        <option value="food">★ 所有食物</option>
+                        <option value="personal">★ 所有個人用品</option>
+                        <option value="money">★ 所有金錢</option>
+                    </optgroup>
+                </select>
+                <button onclick="setMission()" class="btn btn-primary">⚡ 設定題目 (開始計時)</button>
+            </div>
+        </div>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+        <div class="top-controls">
+            <div class="mode-switch">
+                <button id="btnTeam" class="switch-btn active" onclick="switchMode('team')">🔴 團體賽</button>
+                <button id="btnIndividual" class="switch-btn" onclick="switchMode('individual')">🔵 個人賽</button>
+            </div>
+            <div class="session-control">
+                <button id="newSessionBtn" class="btn btn-danger">🔄 重置比賽</button>
+                <button id="historyBtn" class="btn btn-secondary">📜 歷史紀錄</button>
+            </div>
+        </div>
+        
+        <div id="status" class="status">⏳ 連接中...</div>
+
+        <div class="battle-section">
+            <h3>⚡ 本局戰況速報 (由快到慢)</h3>
+            <div id="battleLog" class="battle-log">
+                <div class="empty-log">等待出題與辨識...</div>
+            </div>
+        </div>
+        
+        <div id="ranking" class="ranking">載入中...</div>
+        
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div id="historyModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>📜 歷史紀錄</h3>
+                <div id="historyList">載入中...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
