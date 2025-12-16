@@ -1,34 +1,8 @@
 # 支援前線 YOLO 物體偵測遊戲系統
 
-> 🎮 基於 YOLO 的實時互動遊戲系統
-
-<div align="center">
-
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Status](https://img.shields.io/badge/Status-Completed-brightgreen.svg)
-
-**[查看演示](#-遊戲演示) • [快速開始](#-快速開始) • [架構說明](#-系統架構)**
-
-</div>
+> 「支援前線」是一個分散式物體偵測遊戲系統，整合樹莓派相機模組、YOLO 深度學習模型、RFID 磁扣識別，支援**兩組對抗**及**組內對抗**兩種遊戲模式。
 
 ---
-
-## 📸 遊戲演示
-
-### 遊戲排名介面
-![遊戲排名介面](docs/images/game_interface.png)
-
-### 硬體設置
-![硬體設置](docs/images/system_setup.jpg)
-
-### 系統架構圖
-![系統架構](docs/images/architecture_diagram.png)
-
----
-
-## 📋 專案概述
-
-「支援前線」是一個分散式物體偵測遊戲系統，整合樹莓派相機模組、YOLO 深度學習模型、RFID 磁扣識別，支援**兩組對抗**及**組內對抗**兩種遊戲模式。
 
 **主要特色：**
 - ✅ 實時 YOLO 物體偵測推論
@@ -41,212 +15,107 @@
 
 ## 🏗️ 系統架構
 
+### 模式 1：兩組對抗
+
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      支援前線遊戲系統                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────────┐     ┌──────────────┐   ┌──────────────┐   │
-│  │   A 端       │     │   B 端       │   │   C 端       │   │
-│  │  樹莓派      │     │  Windows     │   │  樹莓派      │   │
-│  │  相機模組    │────▶│  推論伺服器  │◀──│ RFID讀取器   │   │
-│  └──────────────┘     └──────────────┘   └──────────────┘   │
-│         │                     │                    │          │
-│         └─────────────────────┼────────────────────┘          │
-│                               ▼                               │
-│                     ┌──────────────────┐                      │
-│                     │   D 端           │                      │
-│                     │  Linux 伺服器    │                      │
-│                     │  Flask + ngrok   │                      │
-│                     └──────────────────┘                      │
-│                               │                               │
-│                               ▼                               │
-│                     ┌──────────────────┐                      │
-│                     │   E 端           │                      │
-│                     │  網頁顯示排名    │                      │
-│                     │  Chart.js 圖表   │                      │
-│                     └──────────────────┘                      │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
+       A 組                          B 組
+        │                            │
+        ▼                            ▼
+    A 端樹莓派                    B 端 Windows
+      相機拍照                      相機拍照
+        │                            │
+        │                            │
+        └────────┬───────────────────┘
+                 │
+                 │  傳送影像給推論伺服器
+                 │  
+                 ▼
+           B 端推論伺服器
+           (YOLO 模型推論)
+                 │
+                 │  回傳偵測結果
+                 ▼
+                 │
+        ┌────────┴────────┐
+        │                 │
+        ▼                 ▼
+     A 組結果          B 組結果
+        │                 │
+        │                 │
+        └────────┬────────┘
+                 ▼
+             D 端伺服器
+          (Flask + SQLite)
+             計分與排名
+                 │
+                 │  
+                 ▼
+           E 端網頁介面
+           即時排名比較
 ```
+
+**特點：** A、B 兩組各自拍照並將影像傳送給 B 端推論伺服器進行 YOLO 推論，推論結果回傳後分別提交分數到 D 伺服器進行排名比較
+
+---
+
+### 模式 2：組內對抗
+
+```
+       Alice             Bob              Charlie
+      (A 組)            (A 組)             (A 組)
+        │                 │                  │
+        ▼                 ▼                  ▼
+      掃磁扣             掃磁扣             掃磁扣
+        │                 │                  │
+        └────────┬────────┴──────────────────┘
+                 │
+                 │  
+                 │  
+                 ▼
+           C 端 RFID 讀取器
+             (身份識別)
+                 │
+                 │  觸發推論請求
+                 │
+                 ▼
+           B 端推論伺服器
+                 │
+                 │  等待影像
+                 │  
+                 ▼
+           A 端樹莓派相機
+            (拍照並回傳)
+                 │
+                 │  
+                 ▼
+           B 端推論伺服器
+           (YOLO 模型推論)
+                 │
+                 │ 
+                 ▼
+             D 端伺服器
+          (Flask + SQLite)
+             記錄個人分數
+                 │
+                 │ 
+                 ▼
+           E 端網頁介面
+           組內排名與統計
+```
+
+**特點：** 同組成員透過 RFID 磁扣觸發共用相機進行推論，競爭組內排名
 
 ---
 
 ## 👥 團隊角色分工
 
-| 角色 | 設備 | 功能 | 主要責任 |
-|------|------|------|---------|
-| **A** | 樹莓派 | 相機擷取 + 推論 | 攝影 + 即時推論 |
-| **B** | Windows | 推論伺服器 | 遠端推論計算 |
-| **C** | 樹莓派 | RFID 磁扣讀取 | 身份識別 + 觸發 |
-| **D** | Linux | 分數伺服器 + 資料庫 | 數據管理 + 計分 |
-| **E** | 網頁 | 排名顯示與監控 | 前端 UI + 即時更新 |
-
----
-
-## 🎮 遊戲模式
-
-### 模式 1：兩組對抗
-```
-A 組                        B 組
-  │                          │
-  ▼                          ▼
-自己推論                  自己推論
-  │                          │
-  └──────────┬───────────────┘
-             ▼
-          D 伺服器計分
-             ▼
-          實時排名比較
-```
-
-**特點：** 各組獨立運作，即時對比分數
-
----
-
-### 模式 2：組內對抗
-```
-中央相機（共用）
-  △
-  │
-  │ 磁扣觸發
-  │
-┌─┴─────────────────┐
-│                   │
-Alice (A組)    Bob (A組)    Charlie (A組)
-   │               │              │
-   └───────┬───────┴──────────────┘
-           ▼
-      組別計分統計
-```
-
-**特點：** 同組成員輪流推論，競爭組內排名
-
----
-
-## 🚀 快速開始
-
-### 安裝步驟
-
-**1. Clone 專案**
-```bash
-git clone https://github.com/你的用戶名/support-frontline.git
-cd support-frontline
-```
-
-**2. D 端伺服器啟動**
-```bash
-cd D_server
-pip install -r requirements.txt
-python score_server.py
-```
-
-**3. B 端推論伺服器啟動**
-```bash
-cd B_inference
-pip install -r requirements.txt
-
-# 兩組對抗模式
-python inference_server.py
-
-# 或組內對抗模式
-python inference_server_team.py
-```
-
-**4. A 端相機程式啟動**
-```bash
-cd A_camera
-pip install -r requirements.txt
-
-# 兩組對抗模式
-python3 client_cam_A.py
-
-# 或組內對抗模式
-python3 client_cam_A_team.py
-```
-
-**5. C 端 RFID 程式啟動**
-```bash
-cd C_rfid
-pip install -r requirements.txt
-python3 c_rfid_reader.py
-```
-
-**6. E 端網頁打開**
-```bash
-# 用瀏覽器打開
-E_web/index.html
-```
-
----
-
-## ⚙️ 關鍵配置
-
-### A 端 - 修改 B 的 IP
-```python
-# client_cam_A.py 或 client_cam_A_team.py
-B_INFERENCE_SERVER = "http://192.168.x.x:5000"  # 改成 B 的真實 IP
-```
-
-### C 端 - 修改觸發 URL
-```python
-# c_rfid_reader.py
-B_TRIGGER_URL = "http://192.168.x.x:5002/trigger"
-```
-
-### E 端 - 修改 D 的 ngrok 網址
-```javascript
-// app.js
-const API_URL = "https://你的ngrok網址/scores";
-```
-
----
-
-## 📊 數據流程
-
-### 兩組對抗模式
-```
-┌─────────────────┐
-│  A 拍照推論     │
-└────────┬────────┘
-         │
-    發送結果到 D
-         │
-         ▼
-┌─────────────────┐
-│  D 計分+儲存    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  E 查詢+顯示    │
-└─────────────────┘
-```
-
-### 組內對抗模式
-```
-┌─────────────────┐
-│  C 掃磁扣       │
-│  觸發 B 推論    │
-└────────┬────────┘
-         │
-┌────────▼────────┐
-│  A 拍照         │
-│  B 推論         │
-└────────┬────────┘
-         │
-    發送結果到 D
-         │
-         ▼
-┌─────────────────┐
-│  D 計分+儲存    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  E 查詢+顯示    │
-└─────────────────┘
-```
+| 姓名 | 角色 | 設備 | 功能 | 主要責任 |
+|------|------|------|------|---------|
+| 范值均 | **A** | 樹莓派 | 相機擷取 | 攝影 + 回傳影像 |
+| 葉諭玹 | **B** | Windows | 推論伺服器 + 辨識 | 遠端推論計算 |
+| 范值均 | **C** | 樹莓派 | RFID 磁扣讀取 | 身份識別 + 觸發 |
+| 李宣影 | **D** | Linux | 分數伺服器 + 資料庫 | 數據管理 + 計分 |
+| 蘇家軍 | **E** | 網頁 | 排名顯示與監控 | 前端 UI + 即時更新 |
 
 ---
 
@@ -255,124 +124,121 @@ const API_URL = "https://你的ngrok網址/scores";
 ```
 support-frontline/
 ├── README.md
-├── .gitignore
+│
+├── A_camera/                    # 相機端
+│   ├── client_cam_A.py
+│   ├── 2_group.py
+│   ├── requirements.txt
+│   └── README.md
+│
+├── B_inference/                 # 推論伺服器
+│   ├── inference_server.py
+│   ├── team_fight.py
+│   ├── support_frontline.pt
+│   ├── requirements.txt
+│   └── README.md
+│
+├── C_rfid/                      # RFID 讀取
+│   ├── uid_list.json
+│   ├── Intra_group.py
+│   ├── ID_data.txt
+│   └── README.md
 │
 ├── D_server/                    # 伺服器端
 │   ├── score_server.py
 │   ├── requirements.txt
 │   └── README.md
 │
-├── B_inference/                 # 推論伺服器
-│   ├── inference_server.py
-│   ├── inference_server_team.py
-│   ├── best.pt
-│   ├── requirements.txt
-│   └── README.md
-│
-├── A_camera/                    # 相機端
-│   ├── client_cam_A.py
-│   ├── client_cam_A_team.py
-│   ├── requirements.txt
-│   └── README.md
-│
-├── C_rfid/                      # RFID 讀取
-│   ├── c_rfid_reader.py
-│   ├── uid_list.json
-│   ├── team_config.json
-│   ├── requirements.txt
-│   └── README.md
-│
-├── E_web/                       # 網頁前端
-│   ├── index.html
-│   ├── app.js
-│   ├── style.css
-│   └── README.md
-│
-└── docs/
-    ├── images/
-    │   ├── game_interface.png
-    │   ├── system_setup.jpg
-    │   └── architecture_diagram.png
-    ├── 架構說明.md
-    ├── 安裝指南.md
-    └── 遊戲規則.md
+└── E_web/                       # 網頁前端
+    ├── index.html
+    ├── app.js
+    ├── style.css
+    └── README.md
 ```
 
 ---
 
-## 🔌 API 端點
+## 🔧 遇到的挑戰
 
-### D 伺服器
+### 1. 跨網段連線問題
+* **問題**：Server 架在虛擬機，無法直接透過內網 IP 連線。
+* **解決**：使用 **ngrok** 內網穿透技術，在 Server 端執行 `ngrok http 8000`，產生公開 URL（如 `https://xxxx.ngrok-free.app`），讓所有 Client 端突破網段限制，成功建立連線。
 
-**POST /submit** - 提交分數
-```json
-{
-  "team": "A",
-  "item": "person",
-  "correct": 1,
-  "confidence": 0.95
-}
-```
+### 2. 網頁跨域請求被擋
+* **問題**：前端網頁（`index.html`）直接開啟（file://）去呼叫 Server API 時，瀏覽器基於安全性會擋下跨域請求（CORS）。
+* **解決**：安裝 **flask-cors** 套件（`pip install flask-cors`），在 Server 程式（`score_server.py`）中引入 `CORS(app)`，允許跨來源資源共用，讓網頁能順利撈取即時排名資料。
 
-**GET /scores** - 查詢排名
-```json
-[
-  {"team": "B", "score": 15, "total": 15},
-  {"team": "A", "score": 10, "total": 10}
-]
-```
+### 3. 跨平台檔案同步效率低
+* **問題**：Windows 開發環境與 Linux 伺服器之間需手動複製程式碼，導致除錯效率低落。
+* **解決**：在 Linux 伺服器上架設 **Samba 檔案伺服器**，讓 Windows 端可透過網路芳鄰直接存取 Linux 專案目錄，修改後立即生效，大幅提升團隊協作效率。配置範例：
 
-### B 推論伺服器
+---
 
-**POST /inference** - 推論
-```json
-{
-  "image": "base64編碼的影像"
-}
-```
+## 🛠️ 技術與工具
 
-**POST /trigger** - 觸發推論（組內對抗）
-```json
-{
-  "name": "Alice",
-  "team": "A"
-}
-```
+### 後端 
+- **Python + Flask**
+- **SQLite**
+- **ngrok**
+- **flask-cors**
+
+### 物體偵測
+- **YOLO (Ultralytics)**：實時物體偵測模型
+- **OpenCV**：影像處理與相機操作
+
+### 前端 Frontend
+- **HTML / CSS / JavaScript**
+- **Chart.js**
+- **Fetch API**
+
+### 硬體整合 
+- **樹莓派 (Raspberry Pi)**
+- **PiCamera2**
+- **MFRC522**
+---
+
+## 🚀 未來展望
+
+- 擴充訓練資料集，提升 YOLO 模型在複雜場景下的辨識精準度
+- 調整模型超參數（confidence threshold、IoU threshold）減少誤判
+- 引入資料增強技術量化模型（如 YOLOv5n），減少推論延遲
+- 新增即時影像預覽功能，讓玩家確認偵測結果
+- 支援多人同時對戰，擴展遊戲模式
+- 將伺服器部署至雲端平台（AWS/GCP），提升系統穩定性
+- 使用 Docker 容器化部署，簡化環境配置流程
 
 ---
 
 ## 📖 詳細文檔
 
-- [D 伺服器說明](D_server/README.md)
-- [B 推論伺服器說明](B_inference/README.md)
 - [A 相機程式說明](A_camera/README.md)
+- [B 推論伺服器說明](B_inference/README.md)
 - [C RFID 程式說明](C_rfid/README.md)
+- [D 伺服器說明](D_server/README.md)
 - [E 網頁說明](E_web/README.md)
-
----
-
-## 🔧 故障排除
-
-| 問題 | 解決方案 |
-|------|---------|
-| A 無法連接 B | 檢查 B 的 IP，修改 A 的設定 |
-| RFID 無法讀取 | 樹莓派執行 `raspi-config` 啟用 I2C |
-| 網頁顯示 404 | 重啟 ngrok，更新 E 的 URL |
-| 推論很慢 | 用 B 的遠端推論代替本地推論 |
 
 ---
 
 ## 📄 授權
 
-MIT License - 詳見 [LICENSE](LICENSE) 檔案
+MIT License
 
 ---
 
 ## 👨‍💼 貢獻者
 
-- **A** - 范植鈞 - 相機擷取與推論
-- **B** - 葉諭玹 - YOLO 推論伺服器
-- **C** - 范植鈞 - RFID 磁扣識別
-- **D** - 李宣穎 - 後端伺服器與資料庫
-- **E** - 蘇嘉鈞 - 網頁前端與數據可視化
+- **A** - 相機擷取與推論
+- **B** - YOLO 推論伺服器
+- **C** - RFID 磁扣識別
+- **D** - 後端伺服器與資料庫
+- **E** - 網頁前端與數據可視化
 
+---
+
+<div align="center">
+
+⭐ 如果覺得有幫助，請給個 Star！
+
+Made with ❤️ by Your Team
+
+</div>
