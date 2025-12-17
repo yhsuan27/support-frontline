@@ -269,9 +269,9 @@ yolo detect train model=yolov8n.pt data=data.yaml epochs=50 imgsz=640 batch=16
 - **Fetch API**
 
 ### 硬體整合 
-- **樹莓派 (Raspberry Pi)**
-- **PiCamera2**
-- **MFRC522**
+- **樹莓派 (Raspberry Pi3)**
+- **PiCamera V1**
+- **PN532 NFC RFID**
 ---
 
 ## 🚀 未來展望
