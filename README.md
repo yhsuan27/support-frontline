@@ -155,7 +155,8 @@ support-frontline/
     ├── app.js
     └── style.css
 ```
-## 📦 Installation (安裝與執行)
+
+## 📦 安裝與執行
 
 ### A 端 - 樹莓派相機
 
@@ -367,24 +368,24 @@ yolo detect train model=yolov8n.pt data=data.yaml epochs=50 imgsz=640 batch=16
 ## 🛠️ 技術與工具
 
 ### 後端 
-- **Python + Flask**
-- **SQLite**(Linux)
-- **ngrok**
-- **flask-cors**
+- **Python + Flask**：RESTful API 開發
+- **SQLite(Linux)**：資料庫，儲存分數與排名
+- **ngrok**：內網穿透，解決跨網段連線問題
+- **flask-cors**：處理跨域請求
 
 ### 物體偵測
-- **YOLO**
-- **OpenCV**
+- **YOLO**：實時物體偵測模型
+- **OpenCV**：影像處理與相機操作
 
 ### 前端 
-- **HTML / CSS / JavaScript**
-- **Chart.js**
-- **Fetch API**
+- **HTML / CSS / JavaScript**：網頁介面開發
+- **Chart.js**：即時排名圖表
+- **Fetch API**：與後端 RESTful API 串接
 
 ### 硬體整合 
-- **樹莓派 (Raspberry Pi3)**
-- **PiCamera V1**
-- **PN532 NFC RFID**
+- **樹莓派 (Raspberry Pi3)**：相機擷取與 RFID 讀取
+- **PiCamera V1**：樹莓派相機模組控制
+- **PN532 NFC RFID**：RFID 磁扣讀取器
 ---
 
 ## 🚀 未來展望
