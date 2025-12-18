@@ -129,7 +129,6 @@ support-frontline/
 │
 ├── A_camera/                    # 樹梅派相機端
 │   ├── client_cam_A.py
-│   ├── 2_group.py
 │   └── requirements.txt
 │   
 │
@@ -143,7 +142,7 @@ support-frontline/
 ├── C_rfid/                      # RFID 讀取
 │   ├── uid_list.json
 │   ├── Intra_group.py
-│   └── ID_data.txt
+│   └── uid_group.json
 │   
 │
 ├── D_server/                    # 伺服器端
