@@ -175,7 +175,7 @@ pip install ultralytics bing-image-downloader opencv-python
 
 **2. 從網路下載訓練影像**
 - 使用 `bing-image-downloader` 自動從網路下載各類別影像
-- 每類下載 50 張照片，共約 2,450 張
+- 每類下載 50 張照片
 - 自動儲存至 `images/` 資料夾
 
 ```python
