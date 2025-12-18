@@ -166,8 +166,7 @@ support-frontline/
 ```bash
 # 建立虛擬環境
 python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate  
 
 # 安裝必要套件
 pip install ultralytics bing-image-downloader opencv-python
@@ -227,7 +226,7 @@ yolo detect train model=yolov8n.pt data=data.yaml epochs=50 imgsz=640 batch=16
 ```
 
 **7. 訓練成果**
-- **訓練時間**：約 4-6 小時（使用 GPU）
+- **訓練時間**：約 13-15 小時（使用 GPU）
 - **最終模型**：`support_frontline.pt`
 - 可即時透過相機辨識 49 種物品並框選標示
 
