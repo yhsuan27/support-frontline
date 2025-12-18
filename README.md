@@ -128,7 +128,7 @@ support-frontline/
 ├── README.md
 │
 ├── A_camera/                    # 樹梅派相機端
-│   ├── client_cam_A.py
+│   ├── 2_group.py
 │   └── requirements.txt
 │   
 │
@@ -155,6 +155,121 @@ support-frontline/
     ├── app.js
     └── style.css
 ```
+## 📦 Installation (安裝與執行)
+
+### A 端 - 樹莓派相機
+
+**1. 安裝相依套件**
+```bash
+pip install opencv-python picamera2 requests
+```
+
+**2. 設定 B 端推論伺服器 IP**
+```python
+# 編輯 2_group.py
+B_INFERENCE_SERVER = "http://192.168.x.x:5000"  # 改成 B 的實際 IP
+```
+
+**3. 執行程式**
+```bash
+# 兩組對抗模式
+python 2_group.py
+
+# 組內對抗模式
+python Intra_group.py
+```
+
+---
+
+### B 端 - 推論伺服器 (Windows)
+
+**1. 建立虛擬環境**
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+**2. 安裝相依套件**
+```bash
+pip install ultralytics flask opencv-python pillow
+```
+
+**3. 執行推論伺服器**
+```bash
+# 兩組對抗模式
+python inference_server.py
+
+# 組內對抗模式
+python team_fight.py
+```
+
+---
+
+### C 端 - RFID 讀取器 (樹莓派)
+
+**1. 啟用 I2C 介面**
+```bash
+sudo raspi-config
+# 選擇 Interface Options → I2C → Enable
+```
+
+**2. 安裝相依套件**
+```bash
+pip install mfrc522 requests
+```
+
+**3. 設定 B 端觸發 URL**
+```python
+# 編輯 Intra_group.py
+B_TRIGGER_URL = "http://192.168.x.x:5002/trigger"
+```
+
+**4. 執行程式**
+```bash
+python Intra_group.py
+```
+
+---
+
+### D 端 - 分數伺服器 (Linux)
+
+**1. 安裝相依套件**
+```bash
+pip install flask flask-cors
+```
+
+**2. 執行伺服器**
+```bash
+python score_server.py
+```
+
+**3. 啟動 ngrok（解決跨網段連線）**
+```bash
+# 下載並安裝 ngrok
+ngrok http 8000
+
+# 取得公開 URL，例如：https://xxxx.ngrok-free.app
+```
+
+**4. 更新 E 端網頁 URL**
+將 ngrok 產生的 URL 更新至 `E_web/app.js`
+
+---
+
+### E 端 - 網頁前端
+
+**1. 修改 API URL**
+```javascript
+// 編輯 app.js
+const API_URL = "https://你的ngrok網址/scores";
+```
+
+**2. 開啟網頁**
+```bash
+# 使用瀏覽器直接開啟
+E_web/index.html
+```
+
 ---
 ## 🤖 YOLO 模型訓練過程
 
@@ -253,7 +368,7 @@ yolo detect train model=yolov8n.pt data=data.yaml epochs=50 imgsz=640 batch=16
 
 ### 後端 
 - **Python + Flask**
-- **SQLite**
+- **SQLite**(Linux)
 - **ngrok**
 - **flask-cors**
 
@@ -261,7 +376,7 @@ yolo detect train model=yolov8n.pt data=data.yaml epochs=50 imgsz=640 batch=16
 - **YOLO**
 - **OpenCV**
 
-### 前端 Frontend
+### 前端 
 - **HTML / CSS / JavaScript**
 - **Chart.js**
 - **Fetch API**
@@ -277,7 +392,7 @@ yolo detect train model=yolov8n.pt data=data.yaml epochs=50 imgsz=640 batch=16
 - 擴充訓練資料集，提升 YOLO 模型辨識精準度降低誤判
 - 新增即時影像預覽功能，讓玩家確認偵測結果
 - 支援多人同時對戰，擴展遊戲模式
-- 將伺服器部署至雲端平台（AWS/GCP），提升系統穩定性
+- 將伺服器部署至雲端平台（AWS），提升系統穩定性
 - 使用 Docker 容器化部署，簡化環境配置流程
 
 ---
